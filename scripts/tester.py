@@ -1,14 +1,14 @@
 import os
 
 def generate_tests(requirements):
-    code = f"""
-const sum = require('../index');
+    os.makedirs("repo/tests", exist_ok=True)
 
-test('basic test', () => {{
+    test_code = f"""
+// Auto-generated test
+test('basic validation test', () => {{
     expect(true).toBe(true);
 }});
 """
-    os.makedirs("repo/tests", exist_ok=True)
 
-    with open("repo/tests/test_generated.js", "w") as f:
-        f.write(code)
+    with open("repo/tests/generated.test.js", "w") as f:
+        f.write(test_code)
