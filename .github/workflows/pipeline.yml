@@ -1,13 +1,11 @@
-name: AI JavaScript Code Pipeline
+name: Offline AI JS Pipeline
 
 on:
   workflow_dispatch:
     inputs:
       repo_url:
-        description: "GitHub Repository URL"
         required: true
       requirements:
-        description: "Feature or bug requirements"
         required: true
 
 jobs:
@@ -15,170 +13,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clean workspace
       - name: Clean workspace
         run: rm -rf *
 
-      # 2. Clone target repo
-      - name: Clone repository
+      - name: Clone repo
         run: |
           git clone ${{ github.event.inputs.repo_url }} repo
 
-      # 3. Setup Node
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # 4. Install repo dependencies
       - name: Install dependencies
         run: |
           cd repo
           npm install || true
 
-      # 5. Build project tree
-      - name: Generate project tree
-        run: |
-          cd repo
-          find . -type f > tree.txt
-
-      # 6. Setup Python for AI agents
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      - name: Install AI dependencies
+      - name: Run Pipeline Script
         run: |
-          pip install openai langchain langchain-openai
+          python scripts/pipeline.py "${{ github.event.inputs.requirements }}"
 
-      # 7. Enhance Requirements (Agent 1)
-      - name: Enhance Requirements
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python <<EOF
-          from langchain_openai import ChatOpenAI
-
-          llm = ChatOpenAI(model="gpt-4o")
-
-          req = """${{ github.event.inputs.requirements }}"""
-
-          enhanced = llm.invoke(
-              "Convert into detailed, structured, testable requirements:\n" + req
-          ).content
-
-          open("enhanced.txt","w").write(enhanced)
-          EOF
-
-      # 8. Generate TESTS FIRST (Agent 2 - TDD)
-      - name: Generate Jest Tests
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python <<EOF
-          import os
-          from langchain_openai import ChatOpenAI
-
-          llm = ChatOpenAI(model="gpt-4o")
-
-          req = open("enhanced.txt").read()
-
-          tests = llm.invoke(f"""
-          Write Jest test cases in JavaScript.
-          Output ONLY valid JS code.
-
-          Requirements:
-          {req}
-          """).content
-
-          os.makedirs("repo/tests", exist_ok=True)
-
-          open("repo/tests/generated.test.js","w").write(tests)
-          EOF
-
-      # 9. Configure Jest
-      - name: Setup Jest
-        run: |
-          cd repo
-          npm install --save-dev jest || true
-          npm pkg set scripts.test="jest"
-
-      # 10. Director Agent (file decision)
-      - name: Decide Files to Modify
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python <<EOF
-          from langchain_openai import ChatOpenAI
-
-          llm = ChatOpenAI(model="gpt-4o")
-
-          tree = open("repo/tree.txt").read()
-          req = open("enhanced.txt").read()
-
-          files = llm.invoke(f"""
-          Project files:
-          {tree}
-
-          Requirements:
-          {req}
-
-          Return ONLY a JS array of files to modify.
-          Example:
-          ["src/app.js"]
-          """).content
-
-          open("files.txt","w").write(files)
-          EOF
-
-      # 11. Developer Agent (modify code)
-      - name: Modify Code
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python <<EOF
-          import os
-          from langchain_openai import ChatOpenAI
-
-          llm = ChatOpenAI(model="gpt-4o")
-
-          req = open("enhanced.txt").read()
-
-          try:
-              files = eval(open("files.txt").read())
-          except:
-              files = []
-
-          for file in files:
-              path = os.path.join("repo", file)
-
-              if not os.path.exists(path):
-                  continue
-
-              code = open(path).read()
-
-              updated = llm.invoke(f"""
-              Update this JavaScript code to satisfy the requirements.
-
-              Requirements:
-              {req}
-
-              Code:
-              {code}
-              """).content
-
-              open(path, "w").write(updated)
-          EOF
-
-      # 12. Run tests (final validation)
-      - name: Run Tests
+      - name: Run tests
         run: |
           cd repo
           npm test || true
 
-      # 13. Upload results
-      - name: Upload updated repo
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
           name: updated-repo
