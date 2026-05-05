@@ -1,51 +1,71 @@
-name: Offline AI JS Pipeline
+name: Offline AI JavaScript Pipeline
 
 on:
   workflow_dispatch:
     inputs:
       repo_url:
+        description: "GitHub Repo URL"
         required: true
       requirements:
+        description: "Feature / Bug Requirement"
         required: true
+
+# ✅ FIX for Node 24 compatibility
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   pipeline:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Clean workspace
       - name: Clean workspace
         run: rm -rf *
 
+      # ✅ Clone target repo
       - name: Clone repo
         run: |
           git clone ${{ github.event.inputs.repo_url }} repo
 
-      - name: Setup Node
+      # ✅ Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # ✅ Install dependencies
       - name: Install dependencies
         run: |
           cd repo
           npm install || true
 
+      # ✅ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      - name: Run Pipeline Script
+      # ✅ Run pipeline logic
+      - name: Run Offline Pipeline
         run: |
           python scripts/pipeline.py "${{ github.event.inputs.requirements }}"
 
-      - name: Run tests
+      # ✅ Setup Jest (if missing)
+      - name: Setup Jest
+        run: |
+          cd repo
+          npm install --save-dev jest || true
+          npm pkg set scripts.test="jest"
+
+      # ✅ Run tests
+      - name: Run Tests
         run: |
           cd repo
           npm test || true
 
-      - name: Upload result
+      # ✅ Upload result
+      - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
           name: updated-repo
