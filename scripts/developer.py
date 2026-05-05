@@ -1,6 +1,6 @@
 import os
 
-def modify_files(files, requirements):
+def modify_code(files, requirements):
     for file in files:
         path = os.path.join("repo", file)
 
@@ -8,4 +8,4 @@ def modify_files(files, requirements):
             continue
 
         with open(path, "a") as f:
-            f.write(f"\n// Modified for requirement: {requirements}\n")
+            f.write(f"\n// ✅ Updated for requirement: {requirements}\n")
