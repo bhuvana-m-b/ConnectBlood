@@ -1,26 +1,31 @@
-def enhance_requirements(req):
-    return
 import sys
-from analyzer import build_tree, select_js_files
-from developer import modify_files
+from analyzer import build_tree, get_js_files
 from tester import generate_tests
+from developer import modify_code
+
+def enhance_requirements(req):
+    return req.strip().lower()
 
 def main():
-    requirements = sys.argv[1]
+    if len(sys.argv) < 2:
+        print("❌ No requirements provided")
+        return
 
-    print("✅ Step 1: Analyze project")
+    requirements = enhance_requirements(sys.argv[1])
+
+    print("✅ Step 1: Building project tree")
     tree = build_tree()
 
-    print("✅ Step 2: Select JS files")
-    files = select_js_files(tree)
+    print("✅ Step 2: Selecting JS files")
+    js_files = get_js_files(tree)
 
-    print("✅ Step 3: Generate tests (TDD)")
+    print("✅ Step 3: Writing test cases (TDD)")
     generate_tests(requirements)
 
-    print("✅ Step 4: Modify code")
-    modify_files(files, requirements)
+    print("✅ Step 4: Modifying code")
+    modify_code(js_files, requirements)
 
-    print("✅ Done")
+    print("✅ Pipeline completed successfully")
 
 if __name__ == "__main__":
     main()
