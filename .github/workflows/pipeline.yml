@@ -4,15 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       repo_url:
-        description: "GitHub Repo URL"
         required: true
       requirements:
-        description: "Feature / Bug Requirement"
         required: true
-
-# ✅ FIX for Node 24 compatibility
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   pipeline:
@@ -23,16 +17,15 @@ jobs:
       - name: Clean workspace
         run: rm -rf *
 
-      # ✅ Clone target repo
-      - name: Clone repo
-        run: |
-          git clone ${{ github.event.inputs.repo_url }} repo
+      # ✅ Clone repo
+      - name: Clone repository
+        run: git clone ${{ github.event.inputs.repo_url }} repo
 
-      # ✅ Setup Node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      # ✅ Verify Node & Python (already installed)
+      - name: Check Node & Python versions
+        run: |
+          node -v
+          python3 --version
 
       # ✅ Install dependencies
       - name: Install dependencies
@@ -40,18 +33,12 @@ jobs:
           cd repo
           npm install || true
 
-      # ✅ Setup Python
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-
-      # ✅ Run pipeline logic
-      - name: Run Offline Pipeline
+      # ✅ Run offline pipeline
+      - name: Run Pipeline Script
         run: |
-          python scripts/pipeline.py "${{ github.event.inputs.requirements }}"
+          python3 scripts/pipeline.py "${{ github.event.inputs.requirements }}"
 
-      # ✅ Setup Jest (if missing)
+      # ✅ Setup Jest manually
       - name: Setup Jest
         run: |
           cd repo
