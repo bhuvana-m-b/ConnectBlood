@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       repo_url:
+        description: "GitHub Repo URL"
         required: true
       requirements:
+        description: "Feature / Bug Requirement"
         required: true
 
 jobs:
@@ -13,46 +15,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Clean workspace
-      - name: Clean workspace
-        run: rm -rf *
-
-      # ✅ Clone repo
-      - name: Clone repository
-        run: git clone ${{ github.event.inputs.repo_url }} repo
-
-      # ✅ Verify Node & Python (already installed)
-      - name: Check Node & Python versions
+      # ✅ Step 1: Check environment
+      - name: Check Node and Python
         run: |
           node -v
           python3 --version
 
-      # ✅ Install dependencies
+      # ✅ Step 2: Clone target repo (IMPORTANT FIX ✅)
+      - name: Clone target repo
+        run: |
+          git clone ${{ github.event.inputs.repo_url }} repo
+
+      # ✅ Step 3: Verify structure
+      - name: Debug structure
+        run: |
+          echo "Controller repo files:"
+          ls
+          echo "Scripts folder:"
+          ls scripts
+          echo "Cloned repo:"
+          ls repo
+
+      # ✅ Step 4: Install dependencies
       - name: Install dependencies
         run: |
           cd repo
           npm install || true
 
-      # ✅ Run offline pipeline
-      - name: Run Pipeline Script
+      # ✅ Step 5: Run your pipeline script
+      - name: Run Offline Pipeline
         run: |
           python3 scripts/pipeline.py "${{ github.event.inputs.requirements }}"
 
-      # ✅ Setup Jest manually
+      # ✅ Step 6: Setup Jest
       - name: Setup Jest
         run: |
           cd repo
           npm install --save-dev jest || true
           npm pkg set scripts.test="jest"
 
-      # ✅ Run tests
-      - name: Run Tests
+      # ✅ Step 7: Run tests
+      - name: Run tests
         run: |
           cd repo
           npm test || true
 
-      # ✅ Upload result
-      - name: Upload Result
+      # ✅ Step 8: Upload updated repo
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: updated-repo
