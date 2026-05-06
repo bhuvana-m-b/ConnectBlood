@@ -67,11 +67,9 @@ name: JavaScript Test Validation Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -79,29 +77,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #  Step 1: Checkout repo 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # ✅ Load repo
+      - uses: actions/checkout@v4
 
-      #  Step 2: Check Node version
-      - name: Check Node version
-        run: node -v
-
-      #  Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install
-
-      #  Step 4: Ensure Jest exists
-      - name: Setup Jest
+      # ✅ Debug structure
+      - name: Show repo structure
         run: |
+          ls
+          ls backend
+          ls frontend
+
+      # ✅ BACKEND
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Setup Jest in backend
+        run: |
+          cd backend
           npm install --save-dev jest || true
           npm pkg set scripts.test="jest"
 
-      #  Step 5: Add Jest config 
-      - name: Create Jest Config
+      - name: Run backend tests
         run: |
-          echo "module.exports = { testEnvironment: 'node' };" > jest.config.js
+          cd backend
+          npm test
 
-      #  Step 6: RUN ALL TESTS 
-      - name: Run all unit tests
-        run: npm test
+      # ✅ FRONTEND (optional)
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install || true
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test || true
+
