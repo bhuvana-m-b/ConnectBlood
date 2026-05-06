@@ -1,65 +1,107 @@
-name: Offline AI JavaScript Pipeline
+# name: Offline AI JavaScript Pipeline
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       repo_url:
+#         description: "GitHub Repo URL"
+#         required: true
+#       requirements:
+#         description: "Feature / Bug Requirement"
+#         required: true
+
+# jobs:
+#   pipeline:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       #  STEP 1: LOAD YOUR REPO FILES
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       # STEP 2: Verify scripts exist
+#       - name: Debug files
+#         run: |
+#           echo "Root:"
+#           ls
+#           echo "Scripts folder:"
+#           ls scripts
+
+#       #  STEP 3: Clone target repo
+#       - name: Clone target repo
+#         run: |
+#           git clone ${{ github.event.inputs.repo_url }} repo
+
+#       #  STEP 4: Install dependencies
+#       - name: Install dependencies
+#         run: |
+#           cd repo
+#           npm install || true
+
+#       #  STEP 5: Run pipeline
+#       - name: Run pipeline script
+#         run: |
+#           python3 scripts/pipeline.py "${{ github.event.inputs.requirements }}"
+
+#       #  STEP 6: Setup Jest
+#       - name: Setup Jest
+#         run: |
+#           cd repo
+#           npm install --save-dev jest || true
+#           npm pkg set scripts.test="jest"
+
+#       #  STEP 7: Run tests
+#       - name: Run tests
+#         run: |
+#           cd repo
+#           npm test || true
+
+#       #  STEP 8: Upload results
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: updated-repo
+#           path: repo/
+
+name: JavaScript Test Validation Pipeline
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      repo_url:
-        description: "GitHub Repo URL"
-        required: true
-      requirements:
-        description: "Feature / Bug Requirement"
-        required: true
 
 jobs:
-  pipeline:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ STEP 1: LOAD YOUR REPO FILES (MOST IMPORTANT ✅)
+      #  Step 1: Checkout repo 
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ STEP 2: Verify scripts exist
-      - name: Debug files
-        run: |
-          echo "Root:"
-          ls
-          echo "Scripts folder:"
-          ls scripts
+      #  Step 2: Check Node version
+      - name: Check Node version
+        run: node -v
 
-      # ✅ STEP 3: Clone target repo
-      - name: Clone target repo
-        run: |
-          git clone ${{ github.event.inputs.repo_url }} repo
-
-      # ✅ STEP 4: Install dependencies
+      #  Step 3: Install dependencies
       - name: Install dependencies
-        run: |
-          cd repo
-          npm install || true
+        run: npm install
 
-      # ✅ STEP 5: Run pipeline
-      - name: Run pipeline script
-        run: |
-          python3 scripts/pipeline.py "${{ github.event.inputs.requirements }}"
-
-      # ✅ STEP 6: Setup Jest
+      #  Step 4: Ensure Jest exists
       - name: Setup Jest
         run: |
-          cd repo
           npm install --save-dev jest || true
           npm pkg set scripts.test="jest"
 
-      # ✅ STEP 7: Run tests
-      - name: Run tests
+      #  Step 5: Add Jest config 
+      - name: Create Jest Config
         run: |
-          cd repo
-          npm test || true
+          echo "module.exports = { testEnvironment: 'node' };" > jest.config.js
 
-      # ✅ STEP 8: Upload results
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: updated-repo
-          path: repo/
-
+      #  Step 6: RUN ALL TESTS 
+      - name: Run all unit tests
+        run: npm test
