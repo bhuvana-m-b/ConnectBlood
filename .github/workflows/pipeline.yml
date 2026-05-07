@@ -88,10 +88,14 @@ jobs:
           ls frontend
 
       #  BACKEND
+      
       - name: Install backend dependencies
         run: |
           cd backend
-          npm install
+          for i in 1 2 3; do
+             npm ci && break || sleep 10
+          done
+
 
       - name: Setup Jest in backend
         run: |
