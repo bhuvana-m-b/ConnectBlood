@@ -1,3 +1,10 @@
+jest.mock('../models/userModel', () => ({
+  findOne: jest.fn(),
+  findById: jest.fn(),
+  deleteMany: jest.fn(),
+  findByIdAndUpdate: jest.fn()
+}));
+
 // Import required modules
 const request = require('supertest');
 const app = require('../server');
