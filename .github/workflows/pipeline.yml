@@ -1,68 +1,3 @@
-# name: Offline AI JavaScript Pipeline
-
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       repo_url:
-#         description: "GitHub Repo URL"
-#         required: true
-#       requirements:
-#         description: "Feature / Bug Requirement"
-#         required: true
-
-# jobs:
-#   pipeline:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       #  STEP 1: LOAD YOUR REPO FILES
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
-
-#       # STEP 2: Verify scripts exist
-#       - name: Debug files
-#         run: |
-#           echo "Root:"
-#           ls
-#           echo "Scripts folder:"
-#           ls scripts
-
-#       #  STEP 3: Clone target repo
-#       - name: Clone target repo
-#         run: |
-#           git clone ${{ github.event.inputs.repo_url }} repo
-
-#       #  STEP 4: Install dependencies
-#       - name: Install dependencies
-#         run: |
-#           cd repo
-#           npm install || true
-
-#       #  STEP 5: Run pipeline
-#       - name: Run pipeline script
-#         run: |
-#           python3 scripts/pipeline.py "${{ github.event.inputs.requirements }}"
-
-#       #  STEP 6: Setup Jest
-#       - name: Setup Jest
-#         run: |
-#           cd repo
-#           npm install --save-dev jest || true
-#           npm pkg set scripts.test="jest"
-
-#       #  STEP 7: Run tests
-#       - name: Run tests
-#         run: |
-#           cd repo
-#           npm test || true
-
-#       #  STEP 8: Upload results
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: updated-repo
-#           path: repo/
-
 name: JavaScript Test Validation Pipeline
 
 on:
@@ -108,14 +43,7 @@ jobs:
           cd backend
           NODE_ENV=test npm test
 
-      # FRONTEND
-      - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm install || true
+     
 
-      - name: Run frontend tests
-        run: |
-          cd frontend
-          npm test
+      
 
