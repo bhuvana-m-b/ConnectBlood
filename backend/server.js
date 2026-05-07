@@ -11,17 +11,7 @@ import userProfileRoutes from './routes/userProfile.js'
 import uploadRoutes from "./routes/uploadRoutes.js";
 import http from 'http'
 import {Server} from 'socket.io';
-
-
-
-
-
-
-
-
-
 dotenv.config()
-
 
 const base_url = process.env.CLIENT_URL
 connectDb()
@@ -90,8 +80,10 @@ app.use("/api/user",userProfileRoutes)
 app.use("/api", uploadRoutes);
 
 
+export default app;
 
-
-server.listen(PORT, () => {
-  console.log("Server started successfully")
-})
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log("Server started successfully");
+  });
+}
