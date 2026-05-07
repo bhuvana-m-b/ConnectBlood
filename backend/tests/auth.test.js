@@ -1,7 +1,7 @@
 // Import required modules
 const request = require('supertest');
-const app = require('../../app');
-const User = require('../../models/userModel');
+const app = require('../app');
+const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
