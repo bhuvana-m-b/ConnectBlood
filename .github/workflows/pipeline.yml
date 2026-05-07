@@ -108,7 +108,7 @@ jobs:
           cd backend
           NODE_ENV=test npm test
 
-      #  FRONTEND
+      # FRONTEND
       - name: Install frontend dependencies
         run: |
           cd frontend
