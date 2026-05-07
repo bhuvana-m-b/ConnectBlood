@@ -1,9 +1,9 @@
 // Import required modules
-import request from 'supertest';
-import app from '../server.js';
-import User from '../models/userModel.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+const request = require('supertest');
+const app = require('../server');
+const User = require('../models/userModel');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Test suite for AuthController
 describe('AuthController', () => {
