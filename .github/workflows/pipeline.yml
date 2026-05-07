@@ -77,17 +77,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Load repo
+      #  Load repo
       - uses: actions/checkout@v4
 
-      # ✅ Debug structure
+      #  Debug structure
       - name: Show repo structure
         run: |
           ls
           ls backend
           ls frontend
 
-      # ✅ BACKEND
+      #  BACKEND
       - name: Install backend dependencies
         run: |
           cd backend
@@ -104,7 +104,7 @@ jobs:
           cd backend
           npm test
 
-      # ✅ FRONTEND (optional)
+      #  FRONTEND
       - name: Install frontend dependencies
         run: |
           cd frontend
@@ -113,5 +113,5 @@ jobs:
       - name: Run frontend tests
         run: |
           cd frontend
-          npm test || true
+          npm test
 
